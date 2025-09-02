@@ -1,0 +1,63 @@
+//////////////////////
+Notification信息
+    override fun onNotificationPosted(sbn: StatusBarNotification) {
+        val notification = sbn.notification
+        val extras: Bundle = notification.extras
+
+        val data = mutableMapOf<String, Any?>(
+            // From StatusBarNotification
+            "package" to sbn.packageName,
+            //"id" to sbn.id,
+            //"tag" to sbn.tag,
+            //"key" to sbn.key,
+            //"postTime" to sbn.postTime,
+            "isClearable" to sbn.isClearable,
+            //"isOngoing" to sbn.isOngoing,
+
+            // From Notification
+            "when" to notification.`when`,
+            "category" to notification.category,
+            "priority" to notification.priority,
+            "visibility" to notification.visibility,
+            //"flags" to notification.flags,
+            //"color" to notification.color,
+            //"sound" to notification.sound?.toString(),
+            //"defaults" to notification.defaults,
+            "tickerText" to notification.tickerText?.toString(),
+            // "actions" to notification.actions?.map { action ->
+            //     mapOf(
+            //         "title" to action.title,
+            //         "icon" to action.icon,
+            //         "intent" to action.actionIntent?.toString()
+            //     )
+            // }
+        )
+
+        // From Extras (text fields, media, etc.)
+        val extrasMap = mapOf(
+            "title" to extras.getCharSequence(Notification.EXTRA_TITLE)?.toString(),
+            "text" to extras.getCharSequence(Notification.EXTRA_TEXT)?.toString(),
+            //"subText" to extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString(),
+            //"summaryText" to extras.getCharSequence(Notification.EXTRA_SUMMARY_TEXT)?.toString(),
+            //"infoText" to extras.getCharSequence(Notification.EXTRA_INFO_TEXT)?.toString(),
+            //"bigText" to extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString(),
+            //"conversationTitle" to extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)?.toString(),
+            //"template" to extras.getString(Notification.EXTRA_TEMPLATE),
+            //"people" to extras.get(Notification.EXTRA_PEOPLE)?.toString(),
+            // "remoteInputHistory" to extras.getCharSequenceArray(Notification.EXTRA_REMOTE_INPUT_HISTORY)
+            //     ?.map { it.toString() }
+        )
+
+        data.putAll(extrasMap)
+        // val extras: Bundle = sbn.notification.extras
+        // val title = extras.getString("android.title") ?: ""
+        // val text = extras.getCharSequence("android.text")?.toString() ?: ""
+
+        // val data = mapOf(
+        //     "package" to sbn.packageName,
+        //     "title" to title,
+        //     "text" to text
+        // )
+
+        channel?.invokeMethod("onNotificationReceived", data)
+    }
