@@ -26,6 +26,8 @@ class NotificationListener: NotificationListenerService()  {
             "when" to notification.`when`,
             "category" to notification.category,
             "tickerText" to notification.tickerText?.toString(),
+            "priority" to notification.priority,
+            "visibility" to notification.visibility,
         )
 
         // From Extras (text fields, media, etc.)
