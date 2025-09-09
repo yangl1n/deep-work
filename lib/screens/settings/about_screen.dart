@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/interuption.dart'; // adjust path if needed
+import '../../services/interuption.dart'; // adjust path if needed
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});

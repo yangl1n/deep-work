@@ -1,10 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/countdown.dart';
+import '../../models/countdown.dart';
+import 'alarm_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+  @override
+  State<HomeScreen> createState() => _TimerScreenState();
+}
 
+class _TimerScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final countdown = context.read<CountdownModel>();
+    countdown.onAlarmTriggered = () {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const AlarmScreen()),
+      );
+    };
+  }
   @override
   Widget build(BuildContext context) {
     final countdown = context.watch<CountdownModel>();

@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/storage.dart';
+import '../screens/home/alarm_screen.dart';
 
 class CountdownModel extends ChangeNotifier {
   int _timeLeft = 3600;
   int _totalTime = 3600;
   bool _isRunning = false;
   Timer? _timer;
+  VoidCallback? onAlarmTriggered;
 
   int get timeLeft => _timeLeft;
   int get totalTime => _totalTime;
@@ -31,6 +33,10 @@ class CountdownModel extends ChangeNotifier {
         notifyListeners();
       } else {
         stop();
+        // Trigger callback when finished
+        if (onAlarmTriggered != null) {
+          onAlarmTriggered!();
+        }
       }
     });
     notifyListeners();

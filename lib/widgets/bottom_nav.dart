@@ -31,7 +31,7 @@ class BottomNavBar extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
         BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Interupts"),
-        BottomNavigationBarItem(icon: Icon(Icons.info), label: "About"),
+        BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
       ],
     ));
   }

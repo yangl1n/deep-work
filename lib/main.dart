@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'services/interuption.dart';
-import 'screens/home_screen.dart';
+import 'screens/home/home_screen.dart';
 import 'screens/info_screen.dart';
-import 'screens/about_screen.dart';
+import 'screens/settings/setting_screen.dart';
 import 'widgets/bottom_nav.dart';
 import 'widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'models/countdown.dart';
 import 'models/interupts.dart';
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -52,7 +53,7 @@ class _MainPageState extends State<MainPage> {
   final _screens = const [
     HomeScreen(),
     InfoScreen(),
-    AboutScreen(),
+    SettingScreen(),
   ];
 
   final _title = "Deep Work";
