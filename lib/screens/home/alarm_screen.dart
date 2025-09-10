@@ -11,7 +11,6 @@ class AlarmScreen extends StatefulWidget {
 
 class _AlarmScreenState extends State<AlarmScreen> {
   static const MethodChannel _channel = MethodChannel('com.example.deepwork/rings');
-  String? _currentUri;
 
   @override
   void initState() {
@@ -21,28 +20,39 @@ class _AlarmScreenState extends State<AlarmScreen> {
 
   Future<void> _startAlarm() async {
     try {
-      // 1. Get saved ringtone
-      final savedUri = await _channel.invokeMethod<String>('getSavedRingtone');
+      String? uri;
 
-      // 2. If no saved ringtone, pick first system ringtone
-      String? uri = savedUri;
-      if (uri == null) {
+      // 1. Get saved ringtone (JSON)
+      final savedJsonStr = await _channel.invokeMethod<String>('getSavedRingtone');
+
+      if (savedJsonStr != null) {
+        final Map<String, dynamic> savedMap = jsonDecode(savedJsonStr);
+        uri = savedMap['uri']?.toString();
+      }
+
+      // 2. If no saved ringtone, fallback to first system ringtone
+      if (uri == null || uri.isEmpty) {
         final ringtonesStr =
             await _channel.invokeMethod<String>('getSystemRingtones');
         if (ringtonesStr != null) {
           final List<dynamic> list = jsonDecode(ringtonesStr);
-          if (list.isNotEmpty) uri = list.first['uri'];
+          if (list.isNotEmpty) {
+            uri = list.first['uri']?.toString();
+          }
         }
       }
 
-      if (uri != null) {
-        _currentUri = uri;
+      // 3. Play if valid
+      if (uri != null && uri.isNotEmpty) {
         await _channel.invokeMethod('playMusic', {'uri': uri});
+      } else {
+        debugPrint('No ringtone available to play');
       }
     } catch (e) {
       debugPrint('Error starting alarm: $e');
     }
   }
+
 
   Future<void> _stopAlarm() async {
     try {

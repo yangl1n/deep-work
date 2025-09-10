@@ -14,6 +14,10 @@ import org.json.JSONArray
 import org.json.JSONObject
 import android.util.Log
 import java.io.File
+import android.media.AudioManager
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+
 class RingPlugin : FlutterPlugin {
 
     private lateinit var channel: MethodChannel
@@ -23,7 +27,8 @@ class RingPlugin : FlutterPlugin {
     private var mediaPlayer: MediaPlayer? = null
     private val PREFS_NAME = "alarm_prefs"
     private val KEY_RINGTONE_URI = "selected_ringtone"
-
+    private var audioManager: AudioManager? = null
+    private var focusRequest: AudioFocusRequest? = null
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         context = binding.applicationContext
         channel = MethodChannel(binding.binaryMessenger, ChannelName)
@@ -69,7 +74,31 @@ class RingPlugin : FlutterPlugin {
             }
         }
     }
+    private fun requestAudioFocus(): Boolean {
+        audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
+        val attrs = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ALARM)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
+        focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+            .setAudioAttributes(attrs)
+            .setAcceptsDelayedFocusGain(false)
+            .setOnAudioFocusChangeListener { focusChange ->
+                // You can handle changes here if needed
+            }
+            .build()
+
+        val result = audioManager?.requestAudioFocus(focusRequest!!)
+        return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+    }
+
+    private fun abandonAudioFocus() {
+        focusRequest?.let {
+            audioManager?.abandonAudioFocusRequest(it)
+        }
+    }
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         stopMusic()
@@ -106,15 +135,17 @@ class RingPlugin : FlutterPlugin {
                 Uri.fromFile(File(uriString))
             }
 
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(context, uri)
-                isLooping = true
-                setOnPreparedListener { it.start() }
-                setOnErrorListener { mp, what, extra ->
-                    Log.e("RingPlugin", "MediaPlayer error: what=$what, extra=$extra")
-                    true
+            if (requestAudioFocus()) {
+                mediaPlayer = MediaPlayer().apply {
+                    setDataSource(context, uri)
+                    isLooping = true
+                    setOnPreparedListener { it.start() }
+                    setOnErrorListener { mp, what, extra ->
+                        Log.e("RingPlugin", "MediaPlayer error: what=$what, extra=$extra")
+                        true
+                    }
+                    prepareAsync()
                 }
-                prepareAsync()
             }
         } catch (e: Exception) {
             Log.e("RingPlugin", "Error playing music: $e")
@@ -127,6 +158,7 @@ class RingPlugin : FlutterPlugin {
             it.release()
         }
         mediaPlayer = null
+        abandonAudioFocus()
     }
 
     private fun saveRingtone(uriString: String, title: String) {
